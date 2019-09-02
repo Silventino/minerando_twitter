@@ -46,6 +46,7 @@ class StdOutListener(StreamListener):
 		# That sets the api
 		self.api = api
 		self.connection = None
+		self.counter = 0
 
 	def getConnection(self):
 		if(self.connection is None):
@@ -92,7 +93,12 @@ class StdOutListener(StreamListener):
 									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
 			recordTuple = (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location)
 			cursor.execute(mySql_insert_query, recordTuple)
-			connection.commit()
+			
+			self.counter = self.counter + 1
+			if(self.counter > 20):
+				self.counter = 0
+				connection.commit()
+    				
 			inserted_id = cursor.lastrowid
 
 			# cursor.close()
