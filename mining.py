@@ -101,6 +101,11 @@ class StdOutListener(StreamListener):
 		del created_at[0]
 		created_at = " ".join(created_at)
 		created_at = datetime.datetime.strptime(created_at, '%b %d %H:%M:%S %Y')
+		
+		text = tweet["text"]
+		if("extended_tweet" in tweet.keys()):
+			text = tweet["extended_tweet"]["full_text"]
+			# print("achei extended  ", text)
 
 		is_retweet = False
 		if("retweeted_status" in tweet.keys()):
@@ -109,11 +114,14 @@ class StdOutListener(StreamListener):
 		is_quote = False
 		if("quoted_status" in tweet.keys()):
 			is_quote = True
+
+		second_text = ""
+		if("full_text" in tweet.keys()):
+			second_text = tweet["full_text"]
 		
-		text = tweet["text"]
-		if("extended_tweet" in tweet.keys()):
-			text = tweet["extended_tweet"]["full_text"]
-			# print("achei extended  ", text)
+		if(len(second_text) > len(text)):
+			text = second_text
+		
     	
 		tweet_id = self.insertTweet(tweet["id"], user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, tweet["quote_count"], tweet["reply_count"], tweet["retweet_count"], tweet["favorite_count"], created_at)
 		return tweet_id
