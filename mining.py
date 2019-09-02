@@ -45,6 +45,18 @@ class StdOutListener(StreamListener):
 	def __init__(self, api = None):
 		# That sets the api
 		self.api = api
+		self.connection = None
+
+	def getConnection(self):
+		if(self.connection is None):
+			self.connection = mysql.connector.connect(host=db_config.HOST,
+											database=db_config.DATABASE,
+											user=db_config.USER,
+											password=db_config.PASSWORD,
+											charset=db_config.CHARSET)
+		else:
+			self.connection.ping(True)
+		return self.connection
 
 	def createUser(self, user):
 		
@@ -61,11 +73,7 @@ class StdOutListener(StreamListener):
 	def insertUser(self, id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location):
 		# print("insertUser")
 		try:
-			connection = mysql.connector.connect(host=db_config.HOST,
-												database=db_config.DATABASE,
-												user=db_config.USER,
-												password=db_config.PASSWORD,
-												charset=db_config.CHARSET)
+			connection = self.getConnection()
 			cursor = connection.cursor()
 
 			cursor.execute("SELECT id FROM user where id_twitter=" + str(id_twitter))
@@ -87,8 +95,8 @@ class StdOutListener(StreamListener):
 			connection.commit()
 			inserted_id = cursor.lastrowid
 
-			cursor.close()
-			connection.close()
+			# cursor.close()
+			# connection.close()
 			return inserted_id
 		except mysql.connector.Error as error:
 			print("Failed to insert into MySQL table {}".format(error))
@@ -129,11 +137,7 @@ class StdOutListener(StreamListener):
 	def insertTweet(self, id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at):
 		# print("insertTweet")
 		try:
-			connection = mysql.connector.connect(host=db_config.HOST,
-												database=db_config.DATABASE,
-												user=db_config.USER,
-												password=db_config.PASSWORD,
-												charset=db_config.CHARSET)
+			connection = self.getConnection()
 			cursor = connection.cursor()
 
 			cursor.execute("SELECT id FROM tweet where id_twitter=" + str(id_twitter))
@@ -153,8 +157,8 @@ class StdOutListener(StreamListener):
 			cursor.execute(mySql_insert_query, recordTuple)
 			connection.commit()
 			inserted_id = cursor.lastrowid
-			cursor.close()
-			connection.close()
+			# cursor.close()
+			# connection.close()
 			return inserted_id
 		except mysql.connector.Error as error:
 			print("Failed to insert into MySQL table {}".format(error))
