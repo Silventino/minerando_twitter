@@ -95,7 +95,7 @@ class StdOutListener(StreamListener):
 			cursor.execute(mySql_insert_query, recordTuple)
 			
 			self.counter = self.counter + 1
-			if(self.counter > 20):
+			if(self.counter > 100):
 				self.counter = 0
 				connection.commit()
     				
