@@ -81,11 +81,11 @@ class StdOutListener(StreamListener):
 			result = cursor.fetchone()
 			if(result != None):
 				# print("achei user duplicado")
-				cursor.execute ("""
-					UPDATE user
-					SET nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s, created_at=%s, location=%s
-					WHERE id_twitter=%s
-				""", (nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, id_twitter))
+			#	cursor.execute ("""
+			#		UPDATE user
+			#		SET nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s, created_at=%s, location=%s
+			#		WHERE id_twitter=%s
+			#	""", (nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, id_twitter))
 				return result[0]
 
 
@@ -150,11 +150,11 @@ class StdOutListener(StreamListener):
 			result = cursor.fetchone()
 			if(result != None):
 				# print("achei tweet duplicado")
-				cursor.execute ("""
-					UPDATE tweet
-					SET user_id=%s, is_retweet=%s, is_quote=%s, text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s, created_at=%s
-					WHERE id_twitter=%s
-				""", (user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, id_twitter))
+			#	cursor.execute ("""
+			#		UPDATE tweet
+			#		SET user_id=%s, is_retweet=%s, is_quote=%s, text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s, created_at=%s
+			#		WHERE id_twitter=%s
+			#	""", (user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, id_twitter))
 				return result[0]
 
 			mySql_insert_query = """INSERT INTO tweet (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at) 
