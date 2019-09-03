@@ -48,6 +48,7 @@ class StdOutListener(StreamListener):
 		self.connection = None
 		self.counter_user = 0
 		self.counter_tweets = 0
+		self.counter_json = 0
 
 	def getConnection(self):
 		if(self.connection is None):
@@ -219,9 +220,12 @@ class StdOutListener(StreamListener):
 	
 			self.createTweet(data, user_id, ref_quote, ref_retweet)
 			
-			# with open('./teste.json', 'a+', encoding='utf-8') as f:
-			# 	data = json.dumps(data, ensure_ascii=False) + "\n\n"
-			# 	f.write(data)
+			if(self.counter_json < 20):
+				with open('./teste.json', 'a+', encoding='utf-8') as f:
+					data = json.dumps(data, ensure_ascii=False) + "\n\n"
+					f.write(data)
+			else:
+				self.counter_json = self.counter_json + 1
 
 			return True
 		except BaseException as e:
