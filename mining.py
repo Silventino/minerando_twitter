@@ -91,8 +91,10 @@ class StdOutListener(StreamListener):
 
 
 			mySql_insert_query = """INSERT INTO user (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location) 
-									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-			recordTuple = (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location)
+									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
+									ON DUPLICATE KEY UPDATE nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s
+									"""
+			recordTuple = (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified)
 			cursor.execute(mySql_insert_query, recordTuple)
 			
 			self.counter_user = self.counter_user + 1
@@ -106,21 +108,21 @@ class StdOutListener(StreamListener):
 			# connection.close()
 			return inserted_id
 		except mysql.connector.Error as error:
-			print("Failed to insert into MySQL table {}".format(error))
-			try:
-				cursor.execute("SELECT id FROM user where id_twitter=" + str(id_twitter))
-				result = cursor.fetchone()
-				cursor.execute ("""
-						UPDATE user
-						SET nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s, created_at=%s, location=%s
-						WHERE id=%s
-					""", (nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, result[0]))
+			# print("Failed to insert into MySQL table {}".format(error))
+			# try:
+			# 	cursor.execute("SELECT id FROM user where id_twitter=" + str(id_twitter))
+			# 	result = cursor.fetchone()
+			# 	cursor.execute ("""
+			# 			UPDATE user
+			# 			SET nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s, created_at=%s, location=%s
+			# 			WHERE id=%s
+			# 		""", (nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, result[0]))
 
 
-				return result[0]
-			except mysql.connector.Error as error:
-				return 0
-		return 0
+			# 	return result[0]
+			# except mysql.connector.Error as error:
+			#	return 0
+			return 0
 		
 
 	def createTweet(self, tweet, user_id, ref_quote, ref_retweet):
@@ -162,8 +164,9 @@ class StdOutListener(StreamListener):
 			cursor = connection.cursor()
 
 			mySql_insert_query = """INSERT INTO tweet (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at) 
-									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
-			recordTuple = (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at)
+									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
+									ON DUPLICATE KEY UPDATE text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s"""
+			recordTuple = (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count)
 			cursor.execute(mySql_insert_query, recordTuple)
 
 			self.counter_tweets = self.counter_tweets + 1
@@ -176,20 +179,20 @@ class StdOutListener(StreamListener):
 			# connection.close()
 			return inserted_id
 		except mysql.connector.Error as error:
-			print("Failed to insert into MySQL table {}".format(error))
-			try:
-				cursor.execute("SELECT id FROM tweet where id_twitter=" + str(id_twitter))
-				result = cursor.fetchone()
-				cursor.execute ("""
-					UPDATE tweet
-					SET user_id=%s, is_retweet=%s, is_quote=%s, text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s, created_at=%s
-					WHERE id=%s
-				""", (user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, result[0]))
-				return result[0]
+			# print("Failed to insert into MySQL table {}".format(error))
+			# try:
+			# 	cursor.execute("SELECT id FROM tweet where id_twitter=" + str(id_twitter))
+			# 	result = cursor.fetchone()
+			# 	cursor.execute ("""
+			# 		UPDATE tweet
+			# 		SET user_id=%s, is_retweet=%s, is_quote=%s, text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s, created_at=%s
+			# 		WHERE id=%s
+			# 	""", (user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, result[0]))
+			# 	return result[0]
 			
-			except mysql.connector.Error as error:
-				return 0
-		return 0
+			# except mysql.connector.Error as error:
+			# 	return 0
+			return 0
 
 	def on_data(self, data):
 		try:
