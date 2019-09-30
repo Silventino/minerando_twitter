@@ -98,10 +98,14 @@ class StdOutListener(StreamListener):
 			recordTuple = (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified)
 			cursor.execute(mySql_insert_query, recordTuple)
 			
-			self.counter_user = self.counter_user + 1
-			if(self.counter_user > 20):
-				self.counter_user = 0
-				connection.commit()
+
+			# print("COMMITED USERS")
+			connection.commit()
+			# self.counter_user = self.counter_user + 1
+			# if(self.counter_user > 20):
+			# 	self.counter_user = 0
+			# 	print("COMMITED USERS")
+			# 	connection.commit()
     				
 			inserted_id = cursor.lastrowid
 
@@ -109,7 +113,7 @@ class StdOutListener(StreamListener):
 			# connection.close()
 			return inserted_id
 		except mysql.connector.Error as error:
-			# print("Failed to insert into MySQL table {}".format(error))
+			print("Failed to insert into MySQL table {}".format(error))
 			# try:
 			# 	cursor.execute("SELECT id FROM user where id_twitter=" + str(id_twitter))
 			# 	result = cursor.fetchone()
@@ -164,23 +168,28 @@ class StdOutListener(StreamListener):
 			connection = self.getConnection()
 			cursor = connection.cursor()
 
-			mySql_insert_query = """INSERT INTO tweet (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at) 
-									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
+			mySql_insert_query = """INSERT INTO tweet (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, treinamento, sentimento) 
+									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
 									ON DUPLICATE KEY UPDATE text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s"""
-			recordTuple = (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count)
+			recordTuple = (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, None, None, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count)
 			cursor.execute(mySql_insert_query, recordTuple)
 
-			self.counter_tweets = self.counter_tweets + 1
-			if(self.counter_tweets > 20):
-				self.counter_tweets = 0
-				connection.commit()
+
+			# print("COMMITED TWEETS")
+			# print(cursor.statement)
+			connection.commit()
+			# self.counter_tweets = self.counter_tweets + 1
+			# if(self.counter_tweets > 20):
+			# 	self.counter_tweets = 0
+			# 	connection.commit()
+			# 	print("COMMITED TWEETS")
 
 			inserted_id = cursor.lastrowid
 			# cursor.close()
 			# connection.close()
 			return inserted_id
 		except mysql.connector.Error as error:
-			# print("Failed to insert into MySQL table {}".format(error))
+			print("Failed to insert into MySQL table {}".format(error))
 			# try:
 			# 	cursor.execute("SELECT id FROM tweet where id_twitter=" + str(id_twitter))
 			# 	result = cursor.fetchone()
@@ -196,6 +205,7 @@ class StdOutListener(StreamListener):
 			return 0
 
 	def on_data(self, data):
+		# print("Data received")
 		try:
 			# data = data.encode("utf8", "ignore")
 			# data = data.decode("utf8")
@@ -218,8 +228,8 @@ class StdOutListener(StreamListener):
 				ref_quote = self.createTweet(tweet_qt, user_rt_id, None, None)
 			
 	
-			self.createTweet(data, user_id, ref_quote, ref_retweet)
-			
+			id_t = self.createTweet(data, user_id, ref_quote, ref_retweet)
+			# print("Tweet criado ", id_t)
 			# if(self.counter_json < 20):
 			# 	with open('./teste.json', 'a+', encoding='utf-8') as f:
 			# 		data = json.dumps(data, ensure_ascii=False) + "\n\n"
