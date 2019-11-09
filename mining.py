@@ -93,7 +93,7 @@ class StdOutListener(StreamListener):
 
 			mySql_insert_query = """INSERT INTO user (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location) 
 									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
-									ON DUPLICATE KEY UPDATE nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s
+									ON DUPLICATE KEY UPDATE nome=%s, username=%s, description=%s, followers_count=%s, friends_count=%s, listed_count=%s, favourites_count=%s, statuses_count=%s, verified=%s, id=LAST_INSERT_ID(id)
 									"""
 			recordTuple = (id_twitter, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified, created_at, location, nome, username, description, followers_count, friends_count, listed_count, favourites_count, statuses_count, verified)
 			cursor.execute(mySql_insert_query, recordTuple)
@@ -131,6 +131,10 @@ class StdOutListener(StreamListener):
 		
 
 	def createTweet(self, tweet, user_id, ref_quote, ref_retweet):
+		if(user_id == 0):
+			print("ERRO USER ID = 0  ", tweet)
+			return 0
+
 		created_at = tweet["created_at"]
 		created_at = created_at.split(" ")
 		del created_at[4]
@@ -146,10 +150,16 @@ class StdOutListener(StreamListener):
 		is_retweet = False
 		if("retweeted_status" in tweet.keys()):
 			is_retweet = True
+			if(ref_retweet == 0):
+				print("ERRO REF RT = 0  ", tweet)
+				return 0
 		
 		is_quote = False
 		if("quoted_status" in tweet.keys()):
 			is_quote = True
+			if(ref_quote == 0):
+				print("ERRO REF QUOTE = 0  ", tweet)
+				return 0
 
 		second_text = ""
 		if("full_text" in tweet.keys()):
@@ -170,7 +180,7 @@ class StdOutListener(StreamListener):
 
 			mySql_insert_query = """INSERT INTO tweet (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, treinamento, sentimento) 
 									VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) 
-									ON DUPLICATE KEY UPDATE text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s"""
+									ON DUPLICATE KEY UPDATE text=%s, ref_quote=%s, ref_retweet=%s, quote_count=%s, reply_count=%s, retweet_count=%s, favourites_count=%s, id=LAST_INSERT_ID(id)"""
 			recordTuple = (id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, None, None, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count)
 			cursor.execute(mySql_insert_query, recordTuple)
 
@@ -204,6 +214,30 @@ class StdOutListener(StreamListener):
 			# 	return 0
 			return 0
 
+	def insertRetweet(self, user_id, tweet_id):
+		# print("insertTweet")
+		try:
+			connection = self.getConnection()
+			cursor = connection.cursor()
+
+			mySql_insert_query = """INSERT IGNORE INTO retweet (tweet_id, user_id) 
+									VALUES (%s, %s)"""
+			recordTuple = (tweet_id, user_id)
+			cursor.execute(mySql_insert_query, recordTuple)
+
+			connection.commit()
+
+			inserted_id = cursor.lastrowid
+
+			cursor.close()
+			# connection.close()
+			return inserted_id
+		except mysql.connector.Error as error:
+			print("Failed to insert into MySQL table {}".format(error))
+			return 0
+
+
+
 	def on_data(self, data):
 		# print("Data received")
 		try:
@@ -215,10 +249,15 @@ class StdOutListener(StreamListener):
 			user_id = self.createUser(user)
 			ref_retweet = None
 			if("retweeted_status" in data.keys()):
+				# with open('./teste.json', 'a+', encoding='utf-8') as f:
+				# 	data = json.dumps(data, ensure_ascii=False) + "\n\n"
+				# 	f.write(data)
+
 				tweet_rt = data["retweeted_status"]
 				user_rt = tweet_rt["user"]
 				user_rt_id = self.createUser(user_rt)
 				ref_retweet = self.createTweet(tweet_rt, user_rt_id, None, None)
+
 
 			ref_quote = None
 			if("quoted_status" in data.keys()):
@@ -227,8 +266,10 @@ class StdOutListener(StreamListener):
 				user_rt_id = self.createUser(user_rt)
 				ref_quote = self.createTweet(tweet_qt, user_rt_id, None, None)
 			
-	
-			id_t = self.createTweet(data, user_id, ref_quote, ref_retweet)
+			if(ref_retweet == None):
+				id_tweet = self.createTweet(data, user_id, ref_quote, ref_retweet)
+			else:
+				id_retweet = self.insertRetweet(user_id, ref_retweet)
 			# print("Tweet criado ", id_t)
 			# if(self.counter_json < 20):
 			# 	with open('./teste.json', 'a+', encoding='utf-8') as f:

@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 import db_config
 import random
+import sys
 
 class Tweet():
 	def __init__(self, id, id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, favourites_count, retweet_count, quote_count, reply_count, created_at, treinamento, sentimento):
@@ -22,11 +23,26 @@ class Tweet():
 		self.sentimento = sentimento
 
 
-
-
 class ClassificadorManual():
 	def __init__(self, api = None):
 		self.connection = None
+		self.queries = self.getQueries()
+	
+	def getQueries(self, queries_f='./queries.txt'):
+		'''
+		Read the file with the keys for Twitter API and return a dictionary with them.
+		'''
+		try:
+			queries_file = open(queries_f)
+			queries = queries_file.readlines()
+			# Clean \n
+			queries = [query.rstrip() for query in queries]
+		except Exception as e:
+			print('Problem found opening the file '+ queries_f +'.')
+			print(e)
+			sys.exit(1)
+
+		return queries
 
 	def getConnection(self):
 		if(self.connection is None):
@@ -61,8 +77,17 @@ class ClassificadorManual():
 					tweet_rt = Tweet(*args)
 					tweet.text = tweet_rt.text
 
-				return tweet
-	
+				if(self.filtrar(tweet)):
+					return tweet
+				else:
+					# self.deletarTweet(tweet)
+					return None
+
+	# retorna TRUE se o tweet taokei
+	def filtrar(self, tweet):
+		lower_text = tweet.text.lower()
+		return any(q.lower() in lower_text for q in self.queries)
+
 	def salvarTweet(self, tweet):
 		# try:
 		connection = self.getConnection()
@@ -82,28 +107,96 @@ class ClassificadorManual():
 		# 	print("Erro ao salvar tweet classificado")
 		# 	return 0
 
+	def salvarTweetDeletado(self, tweet):
+		# try:
+		connection = self.getConnection()
+		cursor = connection.cursor()
+		
+		mySql_insert_query = """INSERT INTO tweet_deletado (id, id_twitter, user_id, is_retweet, is_quote, text, ref_quote, ref_retweet, quote_count, reply_count, retweet_count, favourites_count, created_at, treinamento, sentimento) 
+								VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) """
+		recordTuple = (tweet.id, tweet.id_twitter, tweet.user_id, tweet.is_retweet, tweet.is_quote, tweet.text, tweet.ref_quote, tweet.ref_retweet, tweet.quote_count, tweet.reply_count, tweet.retweet_count, tweet.favourites_count, tweet.created_at, tweet.treinamento, tweet.sentimento)
+		cursor.execute(mySql_insert_query, recordTuple)
+
+		connection.commit()
+
+		inserted_id = cursor.lastrowid
+
+		return inserted_id
+		# except:
+		# 	print("Erro ao salvar tweet classificado")
+		# 	return 0
+
+	def deletarTweet(self, tweet):
+		print("\n\nVou deletar: ", tweet.text)
+		confirm = input("Pode mandar ver?")
+		if(confirm != "s"):
+			return
+		
+		self.salvarTweetDeletado(tweet)
+
+		connection = self.getConnection()
+		cursor = connection.cursor()
+		cursor.execute("DELETE FROM tweet WHERE id=" + str(tweet.id))
+		print("Principal deleted")
+
+		result_1 = []
+		if(tweet.ref_retweet != None):
+			cursor.execute("SELECT * FROM tweet WHERE ref_retweet=" + str(tweet.ref_retweet))
+			result_1 = cursor.fetchall()
+
+		for t in result_1:
+			ref_tweet = Tweet(*t)
+			if(not self.filtrar(ref_tweet)):
+				self.salvarTweetDeletado(ref_tweet)
+				cursor.execute("DELETE FROM tweet WHERE id=" + str(ref_tweet.id))
+				print("RT deleted")
+
+		
+		# result_2 = []
+		# if(tweet.ref_quote != None):
+		# 	cursor.execute("SELECT * FROM tweet WHERE ref_quote=" + str(tweet.ref_quote))
+		# 	result_2 = cursor.fetchall()
+
+		# for t in result_2:
+		# 	ref_tweet = Tweet(*t)
+		# 	if(not self.filtrar(ref_tweet)):
+		# 		self.salvarTweetDeletado(ref_tweet)
+		# 		cursor.execute("DELETE FROM tweet WHERE id=" + str(ref_tweet.id))
+		
+
+		connection.commit()
+		print("TWEET APAGADO: ", tweet.text)
+
+		# cursor.execute("DELETE FROM tweet WHERE ref=" + str(tweet.id))
+	
+
 			
 def classificar():
 	x = ClassificadorManual()
 	while(True):
 		tweet = x.getTweet()
+		if(tweet == None):
+			continue
 
 		print("\n")
 		print(tweet.text)
 		print("\n")
-		desejaClassificar = input("Deseja classificar o Tweet? (s/n)")
-		if(desejaClassificar == "s"):
-			tweet.treinamento = 1
-			sentimento = input("O sentimento do Tweet é positivo ou negativo? (s = positivo/ n = negativo)")
-			if(sentimento == "s"):
-				tweet.sentimento = 1
-			elif(sentimento == "n"):
-				tweet.sentimento = 0
+		
+		tweet.treinamento = 1
+		sentimento = input("O sentimento do Tweet é positivo ou negativo? (s = positivo/ n = negativo)")
+		if(sentimento == "s"):
+			tweet.sentimento = 1
+		elif(sentimento == "n"):
+			tweet.sentimento = 0
+		elif(sentimento == "d"):
+			print("VOU APAGAR SAPORRA")
+			x.deletarTweet(tweet)
+			continue
 
-			if(tweet.sentimento != None):
-				x.salvarTweet(tweet)
-		else:
-			print("Ok.")
+		if(tweet.sentimento != None):
+			x.salvarTweet(tweet)
+		
+		print("Ok.")
 
 
 classificar()
