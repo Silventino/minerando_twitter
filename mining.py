@@ -22,6 +22,9 @@ import db_config
 # 	return u''.text.encode('utf-8').strip()
 
 # def get_queries(queries_f='../settings/queries.txt'):
+
+TIMES = [ 'Flamengo', 'Palmeiras', 'Santos', 'Grêmio', 'São Paulo', 'Corinthians', 'Athletico', 'Goiás', 'Bahia', 'Atlético', 'galo', 'Vasco', 'Ceará', 'Fortaleza', 'Fluminense', 'flu', 'Cruzeiro', 'zero', 'Botafogo', 'CSA', 'Chapecoense', 'Chapeco', 'Avaí']
+QUERIES_CERTEZA = [ "Bolsonaro", "bolsonaro", "Bolsomito", "bolsomito", "Bozo", "bozo", "Bonoro", "bonoro", "Bozonaro", "bozonaro", "Bonossauro", "bonossauro", "Biroliro", "biroliro", "Jair", "Mitonaro", "Capitão", "Bolodemilho", "bolodemilho", "Bolsonitro", "bolsonitro", "Bonobo", "Jair Bolar", "bonobo", "Salnorabo", "Bonaro", "bonaro", "Boniro", "boniro", "Bonaldo", "bonaldo", "Boçanaro", "boçanaro", "Bosoro", "bosoro", "Bolnossauro", "bolnossauro", "Bolsomario", "bolsomario", "bolsonaristas", "jairbolsonaro", "bozonaro", "burronaro", "bolsonaro", "miliciano", "Boloro" ]
 def get_queries(queries_f='./queries.txt'):
 	'''
 	Read the file with the keys for Twitter API and return a dictionary with them.
@@ -60,6 +63,14 @@ class StdOutListener(StreamListener):
 		else:
 			self.connection.ping(True)
 		return self.connection
+
+	def contemTime(self, text):
+		lower_text = text.lower()
+		tem_time = any(q.lower() in lower_text for q in TIMES)
+		if(not tem_time):
+			return False
+		tem_bolsonaro = any(q.lower() in lower_text for q in QUERIES_CERTEZA)
+		return (not tem_bolsonaro)
 
 	def createUser(self, user):
 		
@@ -244,6 +255,28 @@ class StdOutListener(StreamListener):
 			# data = data.encode("utf8", "ignore")
 			# data = data.decode("utf8")
 			data = json.loads(data)
+
+			
+
+			if("retweeted_status" in data.keys()):
+				teste = data["retweeted_status"]
+			else:
+				teste = data
+
+			text = teste["text"]
+
+			if("extended_tweet" in teste.keys()):
+				text = teste["extended_tweet"]["full_text"]
+				# print("achei extended  ", text)
+			if("quoted_status" in teste.keys()):
+				if("extended_tweet" in teste["quoted_status"].keys()):
+					text += teste["quoted_status"]["extended_tweet"]["full_text"]
+				else:
+					text += teste["quoted_status"]["text"]
+			if(self.contemTime(text)):
+				# print("Contem time")
+				# print(text)
+				return True
 			
 			user = data["user"]
 			user_id = self.createUser(user)
