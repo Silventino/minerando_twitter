@@ -10,8 +10,8 @@ Bozonaro
 bozonaro
 Bonossauro
 bonossauro
-Biroliro
 biroliro
+Biroliro
 Jair
 Mitonaro
 Capitão
@@ -42,3 +42,5 @@ jairbolsonaro
 bozonaro
 burronaro
 bolsonaro
+presidente da república
+presidente

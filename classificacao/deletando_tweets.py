@@ -64,30 +64,56 @@ class ClassificadorManual():
 				SELECT * FROM tweet 
 				WHERE 
 				(
-					LOCATE('Flamengo',text) > 0 OR
-					LOCATE('Palmeiras',text) > 0 OR
-					LOCATE('Santos',text) > 0 OR
-					LOCATE('Grêmio',text) > 0 OR
-					LOCATE('São Paulo',text) > 0 OR
-					LOCATE('Corinthians',text) > 0 OR
-					LOCATE('Athletico-PR',text) > 0 OR
-					LOCATE('Internacional',text) > 0 OR
-					LOCATE('Goiás',text) > 0 OR
-					LOCATE('Bahia',text) > 0 OR
-					LOCATE('Atlético',text) > 0 OR
-					LOCATE('galo',text) > 0 OR
-					LOCATE('Vasco',text) > 0 OR
-					LOCATE('Ceará',text) > 0 OR
-					LOCATE('Fortaleza',text) > 0 OR
-					LOCATE('Fluminense',text) > 0 OR
-					LOCATE('flu',text) > 0 OR
-					LOCATE('Cruzeiro',text) > 0 OR
-					LOCATE('zero',text) > 0 OR
-					LOCATE('Botafogo',text) > 0 OR
-					LOCATE('CSA',text) > 0 OR
-					LOCATE('Chapecoense',text) > 0 OR
-					LOCATE('Chapeco',text) > 0 OR
-					LOCATE('Avaí',text) > 0
+					LOCATE('presidente',text) > 0 OR
+					LOCATE('mito',text) > 0
+				)
+				AND
+				(
+					LOCATE('Bolsonaro',text) = 0 AND
+					LOCATE('bolsonaro',text) = 0 AND
+					LOCATE('Bolsomito',text) = 0 AND
+					LOCATE('bolsomito',text) = 0 AND
+					LOCATE('Bozo',text) = 0 AND
+					LOCATE('bozo',text) = 0 AND
+					LOCATE('Bonoro',text) = 0 AND
+					LOCATE('bonoro',text) = 0 AND
+					LOCATE('Bozonaro',text) = 0 AND
+					LOCATE('bozonaro',text) = 0 AND
+					LOCATE('Bonossauro',text) = 0 AND
+					LOCATE('bonossauro',text) = 0 AND
+					LOCATE('biroliro',text) = 0 AND
+					LOCATE('Biroliro',text) = 0 AND
+					LOCATE('Jair',text) = 0 AND
+					LOCATE('Mitonaro',text) = 0 AND
+					LOCATE('Capitão',text) = 0 AND
+					LOCATE('Bolodemilho',text) = 0 AND
+					LOCATE('bolodemilho',text) = 0 AND
+					LOCATE('Bolsonitro',text) = 0 AND
+					LOCATE('bolsonitro',text) = 0 AND
+					LOCATE('Bonobo',text) = 0 AND
+					LOCATE('Jair Bolar',text) = 0 AND
+					LOCATE('bonobo',text) = 0 AND
+					LOCATE('Salnorabo',text) = 0 AND
+					LOCATE('Bonaro',text) = 0 AND
+					LOCATE('bonaro',text) = 0 AND
+					LOCATE('Boniro',text) = 0 AND
+					LOCATE('boniro',text) = 0 AND
+					LOCATE('Bonaldo',text) = 0 AND
+					LOCATE('bonaldo',text) = 0 AND
+					LOCATE('Boçanaro',text) = 0 AND
+					LOCATE('boçanaro',text) = 0 AND
+					LOCATE('Bosoro',text) = 0 AND
+					LOCATE('bosoro',text) = 0 AND
+					LOCATE('Bolnossauro',text) = 0 AND
+					LOCATE('bolnossauro',text) = 0 AND
+					LOCATE('Bolsomario',text) = 0 AND
+					LOCATE('bolsomario',text) = 0 AND
+					LOCATE('bolsonaristas',text) = 0 AND
+					LOCATE('jairbolsonaro',text) = 0 AND
+					LOCATE('bozonaro',text) = 0 AND
+					LOCATE('burronaro',text) = 0 AND
+					LOCATE('bolsonaro',text) = 0 AND
+					LOCATE('presidente da república',text) = 0
 				)
 				ORDER BY id limit 100;
 				"""
@@ -99,29 +125,56 @@ class ClassificadorManual():
 				WHERE 
 				id > {id_tweet} AND 
 				(
-					LOCATE('Flamengo',text) > 0 OR
-					LOCATE('Palmeiras',text) > 0 OR
-					LOCATE('Santos',text) > 0 OR
-					LOCATE('Grêmio',text) > 0 OR
-					LOCATE('São Paulo',text) > 0 OR
-					LOCATE('Corinthians',text) > 0 OR
-					LOCATE('Athletico-PR',text) > 0 OR
-					LOCATE('Goiás',text) > 0 OR
-					LOCATE('Bahia',text) > 0 OR
-					LOCATE('Atlético',text) > 0 OR
-					LOCATE('galo',text) > 0 OR
-					LOCATE('Vasco',text) > 0 OR
-					LOCATE('Ceará',text) > 0 OR
-					LOCATE('Fortaleza',text) > 0 OR
-					LOCATE('Fluminense',text) > 0 OR
-					LOCATE('flu',text) > 0 OR
-					LOCATE('Cruzeiro',text) > 0 OR
-					LOCATE('zero',text) > 0 OR
-					LOCATE('Botafogo',text) > 0 OR
-					LOCATE('CSA',text) > 0 OR
-					LOCATE('Chapecoense',text) > 0 OR
-					LOCATE('Chapeco',text) > 0 OR
-					LOCATE('Avaí',text) > 0
+					LOCATE('presidente',text) > 0 OR
+					LOCATE('mito',text) > 0
+				)
+				AND
+				(
+					LOCATE('Bolsonaro',text) = 0 AND
+					LOCATE('bolsonaro',text) = 0 AND
+					LOCATE('Bolsomito',text) = 0 AND
+					LOCATE('bolsomito',text) = 0 AND
+					LOCATE('Bozo',text) = 0 AND
+					LOCATE('bozo',text) = 0 AND
+					LOCATE('Bonoro',text) = 0 AND
+					LOCATE('bonoro',text) = 0 AND
+					LOCATE('Bozonaro',text) = 0 AND
+					LOCATE('bozonaro',text) = 0 AND
+					LOCATE('Bonossauro',text) = 0 AND
+					LOCATE('bonossauro',text) = 0 AND
+					LOCATE('biroliro',text) = 0 AND
+					LOCATE('Biroliro',text) = 0 AND
+					LOCATE('Jair',text) = 0 AND
+					LOCATE('Mitonaro',text) = 0 AND
+					LOCATE('Capitão',text) = 0 AND
+					LOCATE('Bolodemilho',text) = 0 AND
+					LOCATE('bolodemilho',text) = 0 AND
+					LOCATE('Bolsonitro',text) = 0 AND
+					LOCATE('bolsonitro',text) = 0 AND
+					LOCATE('Bonobo',text) = 0 AND
+					LOCATE('Jair Bolar',text) = 0 AND
+					LOCATE('bonobo',text) = 0 AND
+					LOCATE('Salnorabo',text) = 0 AND
+					LOCATE('Bonaro',text) = 0 AND
+					LOCATE('bonaro',text) = 0 AND
+					LOCATE('Boniro',text) = 0 AND
+					LOCATE('boniro',text) = 0 AND
+					LOCATE('Bonaldo',text) = 0 AND
+					LOCATE('bonaldo',text) = 0 AND
+					LOCATE('Boçanaro',text) = 0 AND
+					LOCATE('boçanaro',text) = 0 AND
+					LOCATE('Bosoro',text) = 0 AND
+					LOCATE('bosoro',text) = 0 AND
+					LOCATE('Bolnossauro',text) = 0 AND
+					LOCATE('bolnossauro',text) = 0 AND
+					LOCATE('Bolsomario',text) = 0 AND
+					LOCATE('bolsomario',text) = 0 AND
+					LOCATE('bolsonaristas',text) = 0 AND
+					LOCATE('jairbolsonaro',text) = 0 AND
+					LOCATE('bozonaro',text) = 0 AND
+					LOCATE('burronaro',text) = 0 AND
+					LOCATE('bolsonaro',text) = 0 AND
+					LOCATE('presidente da república',text) = 0
 				)
 				ORDER BY id limit 100;
 				"""
