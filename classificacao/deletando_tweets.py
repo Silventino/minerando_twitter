@@ -56,129 +56,67 @@ class ClassificadorManual():
 			self.connection.ping(True)
 		return self.connection
 
-	def getTweets(self, id_tweet=None):
+	def getTweets(self, id_tweet=0):
 		mycursor = self.getConnection().cursor()
-		if(id_tweet == None):
-			mycursor.execute(
-				"""
-				SELECT * FROM tweet 
-				WHERE 
-				(
-					LOCATE('presidente',text) > 0 OR
-					LOCATE('mito',text) > 0
-				)
-				AND
-				(
-					LOCATE('Bolsonaro',text) = 0 AND
-					LOCATE('bolsonaro',text) = 0 AND
-					LOCATE('Bolsomito',text) = 0 AND
-					LOCATE('bolsomito',text) = 0 AND
-					LOCATE('Bozo',text) = 0 AND
-					LOCATE('bozo',text) = 0 AND
-					LOCATE('Bonoro',text) = 0 AND
-					LOCATE('bonoro',text) = 0 AND
-					LOCATE('Bozonaro',text) = 0 AND
-					LOCATE('bozonaro',text) = 0 AND
-					LOCATE('Bonossauro',text) = 0 AND
-					LOCATE('bonossauro',text) = 0 AND
-					LOCATE('biroliro',text) = 0 AND
-					LOCATE('Biroliro',text) = 0 AND
-					LOCATE('Jair',text) = 0 AND
-					LOCATE('Mitonaro',text) = 0 AND
-					LOCATE('Capitão',text) = 0 AND
-					LOCATE('Bolodemilho',text) = 0 AND
-					LOCATE('bolodemilho',text) = 0 AND
-					LOCATE('Bolsonitro',text) = 0 AND
-					LOCATE('bolsonitro',text) = 0 AND
-					LOCATE('Bonobo',text) = 0 AND
-					LOCATE('Jair Bolar',text) = 0 AND
-					LOCATE('bonobo',text) = 0 AND
-					LOCATE('Salnorabo',text) = 0 AND
-					LOCATE('Bonaro',text) = 0 AND
-					LOCATE('bonaro',text) = 0 AND
-					LOCATE('Boniro',text) = 0 AND
-					LOCATE('boniro',text) = 0 AND
-					LOCATE('Bonaldo',text) = 0 AND
-					LOCATE('bonaldo',text) = 0 AND
-					LOCATE('Boçanaro',text) = 0 AND
-					LOCATE('boçanaro',text) = 0 AND
-					LOCATE('Bosoro',text) = 0 AND
-					LOCATE('bosoro',text) = 0 AND
-					LOCATE('Bolnossauro',text) = 0 AND
-					LOCATE('bolnossauro',text) = 0 AND
-					LOCATE('Bolsomario',text) = 0 AND
-					LOCATE('bolsomario',text) = 0 AND
-					LOCATE('bolsonaristas',text) = 0 AND
-					LOCATE('jairbolsonaro',text) = 0 AND
-					LOCATE('bozonaro',text) = 0 AND
-					LOCATE('burronaro',text) = 0 AND
-					LOCATE('bolsonaro',text) = 0 AND
-					LOCATE('presidente da república',text) = 0
-				)
-				ORDER BY id limit 100;
-				"""
+		mycursor.execute(
+			f"""
+			SELECT * FROM tweet 
+			WHERE 
+			id > {id_tweet} AND 
+			(
+				LOCATE('capitão américa',text) > 0 OR
+				LOCATE('galo',text) > 0 OR
+				LOCATE('atlético',text) > 0
 			)
-		else:
-			mycursor.execute(
-				f"""
-				SELECT * FROM tweet 
-				WHERE 
-				id > {id_tweet} AND 
-				(
-					LOCATE('presidente',text) > 0 OR
-					LOCATE('mito',text) > 0
-				)
-				AND
-				(
-					LOCATE('Bolsonaro',text) = 0 AND
-					LOCATE('bolsonaro',text) = 0 AND
-					LOCATE('Bolsomito',text) = 0 AND
-					LOCATE('bolsomito',text) = 0 AND
-					LOCATE('Bozo',text) = 0 AND
-					LOCATE('bozo',text) = 0 AND
-					LOCATE('Bonoro',text) = 0 AND
-					LOCATE('bonoro',text) = 0 AND
-					LOCATE('Bozonaro',text) = 0 AND
-					LOCATE('bozonaro',text) = 0 AND
-					LOCATE('Bonossauro',text) = 0 AND
-					LOCATE('bonossauro',text) = 0 AND
-					LOCATE('biroliro',text) = 0 AND
-					LOCATE('Biroliro',text) = 0 AND
-					LOCATE('Jair',text) = 0 AND
-					LOCATE('Mitonaro',text) = 0 AND
-					LOCATE('Capitão',text) = 0 AND
-					LOCATE('Bolodemilho',text) = 0 AND
-					LOCATE('bolodemilho',text) = 0 AND
-					LOCATE('Bolsonitro',text) = 0 AND
-					LOCATE('bolsonitro',text) = 0 AND
-					LOCATE('Bonobo',text) = 0 AND
-					LOCATE('Jair Bolar',text) = 0 AND
-					LOCATE('bonobo',text) = 0 AND
-					LOCATE('Salnorabo',text) = 0 AND
-					LOCATE('Bonaro',text) = 0 AND
-					LOCATE('bonaro',text) = 0 AND
-					LOCATE('Boniro',text) = 0 AND
-					LOCATE('boniro',text) = 0 AND
-					LOCATE('Bonaldo',text) = 0 AND
-					LOCATE('bonaldo',text) = 0 AND
-					LOCATE('Boçanaro',text) = 0 AND
-					LOCATE('boçanaro',text) = 0 AND
-					LOCATE('Bosoro',text) = 0 AND
-					LOCATE('bosoro',text) = 0 AND
-					LOCATE('Bolnossauro',text) = 0 AND
-					LOCATE('bolnossauro',text) = 0 AND
-					LOCATE('Bolsomario',text) = 0 AND
-					LOCATE('bolsomario',text) = 0 AND
-					LOCATE('bolsonaristas',text) = 0 AND
-					LOCATE('jairbolsonaro',text) = 0 AND
-					LOCATE('bozonaro',text) = 0 AND
-					LOCATE('burronaro',text) = 0 AND
-					LOCATE('bolsonaro',text) = 0 AND
-					LOCATE('presidente da república',text) = 0
-				)
-				ORDER BY id limit 100;
-				"""
+			AND
+			(
+				LOCATE('Bolsonaro',text) = 0 AND
+				LOCATE('bolsonaro',text) = 0 AND
+				LOCATE('Bolsomito',text) = 0 AND
+				LOCATE('bolsomito',text) = 0 AND
+				LOCATE('Bozo',text) = 0 AND
+				LOCATE('bozo',text) = 0 AND
+				LOCATE('Bonoro',text) = 0 AND
+				LOCATE('bonoro',text) = 0 AND
+				LOCATE('Bozonaro',text) = 0 AND
+				LOCATE('bozonaro',text) = 0 AND
+				LOCATE('Bonossauro',text) = 0 AND
+				LOCATE('bonossauro',text) = 0 AND
+				LOCATE('biroliro',text) = 0 AND
+				LOCATE('Biroliro',text) = 0 AND
+				LOCATE('Mitonaro',text) = 0 AND
+				LOCATE('Bolodemilho',text) = 0 AND
+				LOCATE('bolodemilho',text) = 0 AND
+				LOCATE('Bolsonitro',text) = 0 AND
+				LOCATE('bolsonitro',text) = 0 AND
+				LOCATE('Bonobo',text) = 0 AND
+				LOCATE('Jair Bolar',text) = 0 AND
+				LOCATE('bonobo',text) = 0 AND
+				LOCATE('Salnorabo',text) = 0 AND
+				LOCATE('Bonaro',text) = 0 AND
+				LOCATE('bonaro',text) = 0 AND
+				LOCATE('Boniro',text) = 0 AND
+				LOCATE('boniro',text) = 0 AND
+				LOCATE('Bonaldo',text) = 0 AND
+				LOCATE('bonaldo',text) = 0 AND
+				LOCATE('Boçanaro',text) = 0 AND
+				LOCATE('boçanaro',text) = 0 AND
+				LOCATE('Bosoro',text) = 0 AND
+				LOCATE('bosoro',text) = 0 AND
+				LOCATE('Bolnossauro',text) = 0 AND
+				LOCATE('bolnossauro',text) = 0 AND
+				LOCATE('Bolsomario',text) = 0 AND
+				LOCATE('bolsomario',text) = 0 AND
+				LOCATE('bolsonaristas',text) = 0 AND
+				LOCATE('jairbolsonaro',text) = 0 AND
+				LOCATE('bozonaro',text) = 0 AND
+				LOCATE('burronaro',text) = 0 AND
+				LOCATE('bolsonaro',text) = 0 AND
+				LOCATE('presidente da república',text) = 0
 			)
+			ORDER BY id limit 100;
+			"""
+		)
 
 		myresult = mycursor.fetchall()
 			
@@ -258,6 +196,7 @@ class ClassificadorManual():
 		cursor = connection.cursor()
 		print("DELETE FROM tweet WHERE id=" + str(tweet.id))
 		cursor.execute("DELETE FROM tweet WHERE id=" + str(tweet.id))
+		cursor.execute("DELETE FROM tweet_treinamento WHERE id=" + str(tweet.id))
 		print("Principal deleted")
 
 
@@ -322,7 +261,7 @@ def classificar():
 				ultimo_id = tweet.id
 				continue
 				
-			tweet.treinamento = 1
+			# tweet.treinamento = 1
 			# sentimento = input("Pode apagar? (d = apagar)")
 			# if(sentimento == "s"):
 			# 	tweet.sentimento = 1
