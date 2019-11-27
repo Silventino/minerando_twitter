@@ -53,7 +53,7 @@ def dividir_dados_para_treino_e_validacao(dados, stratify = True):
 
     # return treino, validacao
 
-def pre_processamento():
+def pre_processamento(stratify = True):
     dados = obter_dados()
     retorno = []
     for i in range(len(dados)):
@@ -64,7 +64,7 @@ def pre_processamento():
         # retorno.append(["banana", 2])
         # print(texto)
 
-    return dividir_dados_para_treino_e_validacao(dados)
+    return dividir_dados_para_treino_e_validacao(dados, stratify)
     
     # return retorno, retorno
 
@@ -116,6 +116,26 @@ while alfa <= 1:
     alfa = alfa + 0.05
 
 
+dados_treino, dados_avaliacao, respostas_treino, respostas_avaliacao = pre_processamento(False)
+
+print("quantidade treino:", len(dados_treino))
+print("quantidade avaliacao:", len(dados_avaliacao))
+# vetorizador = CountVectorizer(binary = 'true', stop_words=STOPWORDS)
+vetorizador_2 = CountVectorizer(binary = 'true', stop_words=STOPWORDS)
+
+alfas_2 = []
+resultados_2 = []
+alfa = 0
+while alfa <= 1:
+    alfas_2.append(alfa)
+    classificador = realizar_treinamento(dados_treino, respostas_treino, vetorizador_2, alfa)
+    acuracia = realizar_teste(dados_avaliacao, respostas_avaliacao, classificador, vetorizador_2)
+    resultados_2.append(acuracia)
+    print("ALFA", alfa)
+    print("ACURACIA", acuracia)
+    alfa = alfa + 0.05
+
+
 
 # x = np.linspace(0, 10, 500)
 # y = np.sin(x)
@@ -123,11 +143,11 @@ while alfa <= 1:
 fig, ax = plt.subplots()
 
 # Using set_dashes() to modify dashing of an existing line
-line1, = ax.plot(alfas, resultados, label='Using set_dashes()')
+line1, = ax.plot(alfas, resultados, label='Usando estratificação')
 # line1.set_dashes([2, 2, 10, 2])  # 2pt line, 2pt break, 10pt line, 2pt break
 
 # Using plot(..., dashes=...) to set the dashing when creating a line
-# line2, = ax.plot(x, y - 0.2, label='Using the dashes parameter')
+line2, = ax.plot(alfas_2, resultados_2, label='Não usando estratificação')
 
 ax.legend()
 plt.show()
