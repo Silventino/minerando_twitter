@@ -25,17 +25,17 @@ def obter_dados():
 	
     cursor = connection.cursor()
 
-    cursor.execute("SELECT text, sentimento FROM tweet_treinamento where sentimento=1 limit 200")
-    result = cursor.fetchall()
-
-    cursor.execute("SELECT text, sentimento FROM tweet_treinamento where sentimento=0 limit 100")
-    result.extend(cursor.fetchall())
-
-    cursor.execute("SELECT text, sentimento FROM tweet_treinamento where sentimento=-1 limit 200")
-    result.extend(cursor.fetchall())
-
-    # cursor.execute("SELECT text, sentimento FROM tweet_treinamento")
+    # cursor.execute("SELECT text, sentimento FROM tweet_treinamento where sentimento=1 limit 200")
     # result = cursor.fetchall()
+
+    # cursor.execute("SELECT text, sentimento FROM tweet_treinamento where sentimento=0 limit 100")
+    # result.extend(cursor.fetchall())
+
+    # cursor.execute("SELECT text, sentimento FROM tweet_treinamento where sentimento=-1 limit 200")
+    # result.extend(cursor.fetchall())
+
+    cursor.execute("SELECT text, sentimento FROM tweet_treinamento")
+    result = cursor.fetchall()
 
     # cursor.execute("SELECT text, sentimento FROM tweet_treinamento where ")
     # result = cursor.fetchall()
@@ -59,6 +59,7 @@ def pre_processamento(test_size, stratify = True):
     retorno = []
     for i in range(len(dados)):
         texto = dados[i][0]
+        texto = re.sub("@jairbolsonaro", "jairbolsonaro", texto)
         texto = re.sub("@\w", "", texto)
         texto = re.sub(r'(https|http)?:\/\/(\w|\.|\/|\?|\=|\&|\%|\$)*\b', "http", texto)
         retorno.append([texto, dados[i][1]])
@@ -67,15 +68,16 @@ def pre_processamento(test_size, stratify = True):
     
 def realizar_treinamento(dados_treino, respostas_treino, vetorizador, alfa = 0.5):
     dados_treino = vetorizador.fit_transform(dados_treino)
-    return BernoulliNB(alpha=alfa).fit(dados_treino, respostas_treino)
+    # return BernoulliNB(alpha=alfa).fit(dados_treino, respostas_treino)
+    return MultinomialNB(alpha=alfa).fit(dados_treino, respostas_treino)
 
 def realizar_teste(dados_avaliacao, respostas_avaliacao, classificador, vetorizador):
     dados_avaliacao = vetorizador.transform(dados_avaliacao)
     return classificador.predict(dados_avaliacao), classificador.score(dados_avaliacao, respostas_avaliacao)
 
-def realizar_teste_novo(dados_avaliacao, respostas_avaliacao, classificador, vetorizador):
-    dados_avaliacao = vetorizador.transform(dados_avaliacao)
-    probabilidades = classificador.predict_proba(dados_avaliacao)
+def realizar_teste_novo(dados_avaliacao, respostas_avaliacao, classificador, vetorizador, tolerancia):
+    dados_avaliacao_2 = vetorizador.transform(dados_avaliacao)
+    probabilidades = classificador.predict_proba(dados_avaliacao_2)
     predicoes = []
     guess = {
         0: -1,
@@ -84,7 +86,7 @@ def realizar_teste_novo(dados_avaliacao, respostas_avaliacao, classificador, vet
     }
     for prob in probabilidades:
         prob_list = list(prob)
-        if max(prob_list) < 0.6:
+        if max(prob_list) < tolerancia:
             predicoes.append(0)
         else:
             
@@ -94,6 +96,8 @@ def realizar_teste_novo(dados_avaliacao, respostas_avaliacao, classificador, vet
     for i in range(len(predicoes)):
         if(predicoes[i] == respostas_avaliacao[i]):
             acertos = acertos + 1
+        # elif respostas_avaliacao[i] == 0:
+        #     print(dados_avaliacao[i])
 
     return predicoes, acertos/len(predicoes)
 
@@ -134,8 +138,21 @@ def calcular_estatisticas(predicoes, respostas):
     for i in range(len(predicoes)):
         matriz[posicoes[predicoes[i]]][posicoes[respostas[i]]] += 1
 
+    erros_graves = 0
+    erros_graves += matriz[0][1]
+    erros_graves += matriz[0][2]
+    erros_graves += matriz[2][0]
+    erros_graves += matriz[2][1]
+    erros_graves = (erros_graves/len(predicoes))
 
-    return matriz
+    acuracia = 0
+    acuracia += matriz[0][0]
+    acuracia += matriz[1][1]
+    acuracia += matriz[2][2]
+    acuracia = acuracia/len(predicoes)
+
+    return erros_graves, matriz
+    # return matriz
 
 def plotar_heatmap(matriz_1, matriz_2):
     labels = ["Positivo", "Neutro", "Negativo"]
@@ -161,7 +178,7 @@ def plotar_heatmap(matriz_1, matriz_2):
             text = ax[0].text(j, i, matriz_1[i, j],
                         ha="center", va="center", color="w")
 
-    ax[0].set_title("Harvest of local farmers (in tons/year)")
+    ax[0].set_title("Heatmap - normal")
 
 
     
@@ -187,7 +204,7 @@ def plotar_heatmap(matriz_1, matriz_2):
             text = ax[1].text(j, i, matriz_2[i, j],
                         ha="center", va="center", color="w")
 
-    ax[1].set_title("Harvest of local farmers (in tons/year)")
+    ax[1].set_title("Heatmap - com tolerância")
 
 
 
@@ -208,6 +225,14 @@ while alfa <= 1:
     alfa = round(alfa + variacao_alfa, 2)
 
 
+tolerancias= []
+tolerancia = 0.4
+variacao_tolerancia = 0.1
+while tolerancia <= 0.9:
+    tolerancias.append(tolerancia)
+    tolerancia = round(tolerancia + variacao_tolerancia, 2)
+
+
 ################# GRAFICO VARIANDO TEST SIZE ########################
 sizes = [0.2]
 # sizes = []
@@ -217,43 +242,76 @@ sizes = [0.2]
 #     sizes.append(test_size)
 #     test_size = round(test_size + variacao_teste_size, 1)
 
-
+melhor_resultado_calculo_1 = 0
+melhor_resultado_1 = None
+melhor_matriz_1 = None
+melhor_resultado_calculo_2 = 0
+melhor_resultado_2 = None
+melhor_matriz_2 = None
 resultados = []
 for test_size in sizes:
+    print("TESTE SIZE = ", test_size)
     dados_treino, dados_avaliacao, respostas_treino, respostas_avaliacao = pre_processamento(test_size ,True)
     # dados_avaliacao = [dados_avaliacao[i] for i in range(len(dados_avaliacao)) if respostas_avaliacao[i] != 0]
     # dados_treino = [dados_treino[i] for i in range(len(dados_treino)) if respostas_treino[i] != 0]
     # respostas_avaliacao = [respostas_avaliacao[i] for i in range(len(respostas_avaliacao)) if respostas_avaliacao[i] != 0]
     # respostas_treino = [respostas_treino[i] for i in range(len(respostas_treino)) if respostas_treino[i] != 0]
+
     vetorizador = CountVectorizer(binary = 'true', stop_words=STOPWORDS)
 
     resultado = []
-    for alfa in alfas:
-        classificador = realizar_treinamento(dados_treino, respostas_treino, vetorizador, alfa)
-        predicoes_1, acuracia_1 = realizar_teste(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
-        print(acuracia_1)
-        matriz_1 = calcular_estatisticas(predicoes_1, respostas_avaliacao)
+    for tolerancia in tolerancias:
+        for alfa in alfas:
+            print("ALFA =", alfa)
+            classificador = realizar_treinamento(dados_treino, respostas_treino, vetorizador, alfa)
+            predicoes_1, acuracia_1 = realizar_teste(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
+            erros_graves_1, matriz_1 = calcular_estatisticas(predicoes_1, respostas_avaliacao)
+            print("ACURACIA: ", acuracia_1)
+            print("ERROS GRAVES:", erros_graves_1)
 
-        predicoes_2, acuracia_2 = realizar_teste_novo(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
-        print(acuracia_2)
-        matriz_2 = calcular_estatisticas(predicoes_2, respostas_avaliacao)
+            resultado_calculo_1 = (acuracia_1 * 1.5) + (1-erros_graves_1)
+            if(melhor_resultado_calculo_1 < resultado_calculo_1):
+                melhor_resultado_calculo_1 = resultado_calculo_1
+                melhor_resultado_1 = {"acuracia": acuracia_1, "erros_graves": erros_graves_1, "alfa": alfa}
+                melhor_matriz_1 = matriz_1
 
-        plotar_heatmap(matriz_1, matriz_2)
-        # prob = testar_prob(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
-        # pred = testar_predict(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
-        # prob = [prob[i] for i in range(len(pred)) if pred[i] != 0]
-        # printar = [dados_avaliacao[i] for i in range(len(pred)) if pred[i] != 0]
-        # pred = [pred[i] for i in range(len(pred)) if pred[i] != 0]
-        # for i in range(len(pred)):
-        #     print(printar[i])
-        #     print(pred[i])
-        #     print(prob[i])
-        #     print("\n")
 
-        # resultado.append(acuracia)
-    # resultados.append(resultado)
+            predicoes_2, acuracia_2 = realizar_teste_novo(dados_avaliacao, respostas_avaliacao, classificador, vetorizador, tolerancia)
+            erros_graves_2, matriz_2 = calcular_estatisticas(predicoes_2, respostas_avaliacao)
+            print("TOLERANCIA =", tolerancia)
+            print("ACURACIA: ", acuracia_2)
+            print("ERROS GRAVES:", erros_graves_2)
+
+            resultado_calculo_2 = (acuracia_2 * 1.5) + (1-erros_graves_2)
+            if(melhor_resultado_calculo_2 < resultado_calculo_2):
+                melhor_resultado_calculo_2 = resultado_calculo_2
+                melhor_resultado_2 = {"acuracia": acuracia_2, "erros_graves": erros_graves_2, "alfa": alfa, "tolerancia": tolerancia}
+                melhor_matriz_2 = matriz_2
+
+            print("\n")
+
+            
+
+            # plotar_heatmap(matriz_1, matriz_2)
+            
+            # prob = testar_prob(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
+            # pred = testar_predict(dados_avaliacao, respostas_avaliacao, classificador, vetorizador)
+            # prob = [prob[i] for i in range(len(pred)) if pred[i] != 0]
+            # printar = [dados_avaliacao[i] for i in range(len(pred)) if pred[i] != 0]
+            # pred = [pred[i] for i in range(len(pred)) if pred[i] != 0]
+            # for i in range(len(pred)):
+            #     print(printar[i])
+            #     print(pred[i])
+            #     print(prob[i])
+            #     print("\n")
+
+            # resultado.append(acuracia)
+        # resultados.append(resultado)
     
-    
+print("MELHOR RESULTADO: ",melhor_resultado_1)
+print("MELHOR RESULTADO: ",melhor_resultado_2)
+plotar_heatmap(melhor_matriz_1, melhor_matriz_2)
+
 
 fig, ax = plt.subplots()
 plt.xlabel("Alfa")
