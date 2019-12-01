@@ -313,12 +313,12 @@ print("MELHOR RESULTADO: ",melhor_resultado_2)
 plotar_heatmap(melhor_matriz_1, melhor_matriz_2)
 
 
-fig, ax = plt.subplots()
-plt.xlabel("Alfa")
-plt.ylabel("Acurácia")
+# Using set_dashes() to modify dashing of an existing line
+line1, = ax.plot(alfas, resultados, label='Usando estratificação')
+# line1.set_dashes([2, 2, 10, 2])  # 2pt line, 2pt break, 10pt line, 2pt break
 
-for i in range(len(resultados)):
-    line, = ax.plot(alfas, resultados[i], label='Tamanho teste: ' + str(sizes[i]))
+# Using plot(..., dashes=...) to set the dashing when creating a line
+line2, = ax.plot(alfas_2, resultados_2, label='Não usando estratificação')
 
 ax.legend()
 # plt.show()
